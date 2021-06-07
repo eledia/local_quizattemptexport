@@ -1,0 +1,45 @@
+<div class="usersattemptslist">
+
+    {{#exportallurl}}
+        <a href="{{{exportallurl}}}" id="exportallbtn" class="btn btn-primary">{{#str}}template_usersattemptslist_exportall, local_quizattemptexport{{/str}}</a>
+    {{/exportallurl}}
+
+    {{#users}}
+
+        <div class="userattempts">
+
+            <h3>{{{fullname}}} ({{{username}}})</h3>
+
+            {{#attempts}}
+
+                <table>
+                    <tr>
+                        <th {{^reexporturl}}colspan="2"{{/reexporturl}}>{{#str}}template_usersattemptslist_attemptfrom, local_quizattemptexport{{/str}}: {{{timefinished}}}</th>
+                        {{#reexporturl}}
+                            <th><a href="{{{reexporturl}}}">{{#str}}template_usersattemptslist_reexportattempttitle, local_quizattemptexport{{/str}}</a></th>
+                        {{/reexporturl}}
+                    </tr>
+                    {{#files}}
+                        <tr>
+                            <td><a href="{{{url}}}">{{{name}}}</a></td>
+                            <td>{{{timecreated}}}</td>
+                        </tr>
+                    {{/files}}
+                    {{^files}}
+                        <tr>
+                            <td {{#reexporturl}}colspan="2"{{/reexporturl}}>{{#str}}template_usersattemptslist_nofiles, local_quizattemptexport{{/str}}</td>
+                        </tr>
+                    {{/files}}
+                </table>
+
+            {{/attempts}}
+
+        </div>
+
+    {{/users}}
+
+    {{^users}}
+        <h3>{{#str}}template_usersattemptslist_noattempts, local_quizattemptexport{{/str}}</h3>
+    {{/users}}
+
+</div>

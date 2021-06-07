@@ -1,0 +1,23 @@
+.usersattemptslist #exportallbtn {
+    float: right;
+}
+
+.usersattemptslist .userattempts {
+    clear: both;
+}
+
+.usersattemptslist .userattempts table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+
+.usersattemptslist .userattempts table th,
+.usersattemptslist table td {
+    border: 1px solid #000;
+    padding: 5px;
+}
+
+.usersattemptslist .userattempts {
+    margin-bottom: 30px;
+}
