@@ -41,6 +41,7 @@ class export_attempt {
     private $logger;
 
     private $exportpath;
+    private $exportfilesystem;
 
     /** @var \quiz_attempt $attempt_obj */
     private $attempt_obj;
@@ -67,7 +68,6 @@ class export_attempt {
             throw $exc;
         }
 
-        /*
         // idnumber currently not used...
         if (empty($this->user_rec->idnumber)) {
 
@@ -76,15 +76,17 @@ class export_attempt {
 
             throw $exc;
         }
-        */
 
-        // Check export directory.
-        try {
-            $this->exportpath = $this->prepare_downloadarea();
-        } catch (\moodle_exception $e) {
-            $this->logexception($e);
+        if ($this->exportfilesystem = get_config('local_quizattemptexport', 'exportfilesystem')) {
 
-            throw $e;
+            // Check export directory.
+            try {
+                $this->exportpath = $this->prepare_downloadarea();
+            } catch (\moodle_exception $e) {
+                $this->logexception($e);
+
+                throw $e;
+            }
         }
 
         // Create page object for internal use.
@@ -207,8 +209,8 @@ class export_attempt {
         $instance = $DB->get_record('quiz', ['id' => $cm->instance]);
         $quizname = clean_param($instance->name, PARAM_FILE);
 
-        // The users login name.
-        $username = $this->user_rec->username;
+        // The idnumber which is used for matriculation id.
+        $idnumber = $this->user_rec->idnumber;
 
         // The attempts id for uniqueness.
         $attemptid = $this->attempt_obj->get_attemptid();
@@ -220,17 +222,19 @@ class export_attempt {
         $contenthash = hash('sha256', $tempfilecontent);
 
         // Piece the file name parts together.
-        $filename = $quizname . '_' . $username . '_' . $attemptid . '_' . $time . '_' . $contenthash . '.pdf';
+        $filename = $quizname . '_' . $idnumber . '_' . $attemptid . '_' . $time . '_' . $contenthash . '.pdf';
 
+        // Write file into filesystem?
+        if ($this->exportfilesystem) {
 
-        // TODO local filname might require milliseconds instead of seconds.
-        // Write file into the defined export dir, so it may be archived using sftp.
-        $localfilepath = $this->exportpath . '/' . $filename;
-        file_put_contents($localfilepath, $tempfilecontent);
+            // TODO local filname might require milliseconds instead of seconds.
+            // Write file into the defined export dir, so it may be archived using sftp.
+            $localfilepath = $this->exportpath . '/' . $filename;
+            file_put_contents($localfilepath, $tempfilecontent);
+        }
 
         // Debug output...
         //file_put_contents($localfilepath . '.html', $html);
-
 
         // Write file into moodle file system for web access to the files.
         $cm = $this->attempt_obj->get_cm();

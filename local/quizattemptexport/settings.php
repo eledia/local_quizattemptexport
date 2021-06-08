@@ -41,6 +41,12 @@ if ($hassiteconfig) { // needs this condition or there is error on login page
             0)
     );
 
+    $settings->add(new admin_setting_configcheckbox('local_quizattemptexport/exportfilesystem',
+            get_string('setting_exportfilesystem', 'local_quizattemptexport'),
+            get_string('setting_exportfilesystem_desc', 'local_quizattemptexport'),
+            0)
+    );
+
     $pdfexportdir_default = $CFG->dataroot . '/quizattemptexport';
     $settings->add(new admin_setting_configdirectory('local_quizattemptexport/pdfexportdir',
             get_string('setting_pdfexportdir', 'local_quizattemptexport'),

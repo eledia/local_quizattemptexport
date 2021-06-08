@@ -1,5 +1,7 @@
-.usersattemptslist #exportallbtn {
+.usersattemptslist #exportallbtn,
+.usersattemptslist #zipdownloadbtn{
     float: right;
+    margin-left: 10px;
 }
 
 .usersattemptslist .userattempts {

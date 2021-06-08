@@ -1,5 +1,9 @@
 <div class="usersattemptslist">
 
+    {{#zipdownloadurl}}
+        <a href="{{{zipdownloadurl}}}" id="zipdownloadbtn" class="btn btn-primary">{{#str}}template_usersattemptslist_zipdownload, local_quizattemptexport{{/str}}</a>
+    {{/zipdownloadurl}}
+
     {{#exportallurl}}
         <a href="{{{exportallurl}}}" id="exportallbtn" class="btn btn-primary">{{#str}}template_usersattemptslist_exportall, local_quizattemptexport{{/str}}</a>
     {{/exportallurl}}

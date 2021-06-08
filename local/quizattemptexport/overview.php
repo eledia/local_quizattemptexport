@@ -31,6 +31,7 @@ require_once '../../config.php';
 $cmid = required_param('cmid', PARAM_INT);
 $reexportattemptid = optional_param('reexport', 0, PARAM_INT);
 $reexportall = optional_param('exportall', 0, PARAM_INT);
+$downloadzip = optional_param('downloadzip', 0, PARAM_INT);
 
 
 // Get course module, quiz instance and context.
@@ -59,6 +60,38 @@ $PAGE->set_url($selfurl);
 $PAGE->set_title($strpagetitle);
 $PAGE->set_heading($strpagetitle);
 
+
+// Check if we should export a zip file of all attempt exports.
+if ($downloadzip) {
+
+    $fs = get_file_storage();
+    $attemptfiles = [];
+    foreach ($DB->get_records('quiz_attempts', ['quiz' => $instance->id, 'state' => 'finished', 'preview' => 0]) as $attempt) {
+
+        $oneattemptfiles = $fs->get_area_files(
+            $context->id,
+            'local_quizattemptexport',
+            'export',
+            $attempt->id,
+            'timecreated',
+            false
+        );
+        foreach ($oneattemptfiles as $oneattemptfile) {
+            $attemptfiles[$oneattemptfile->get_filename()] = $oneattemptfile;
+        }
+    }
+
+    $zipname = clean_param($instance->name, PARAM_FILE);
+    $temppath = $CFG->tempdir . '/' . $zipname;
+        $zipper = new zip_packer();
+    if ($zipper->archive_to_pathname($attemptfiles, $temppath)) {
+        send_temp_file($temppath, $zipname . '.zip');
+    } else {
+        debugging("Problems with archiving the files.", DEBUG_DEVELOPER);
+        die;
+    }
+
+}
 
 // Check if we should export an attempt.
 if ($hasgradecap && $reexportattemptid) {
