@@ -40,26 +40,13 @@ class ddwtos extends base {
         // Initialize required data.
         $qa = $attempt->get_question_attempt($slot);
         $question = $qa->get_question();
-        $answers_raw = $DB->get_records('question_answers', ['question' => $question->id]);
-
-        // Unpack answer options into their related groups.
-        $answers = [];
-        foreach ($answers_raw as $answerrec) {
-
-            $adddata = unserialize($answerrec->feedback);
-            $group = $adddata->draggroup;
-            if (!isset($answers[$group])) {
-                $answers[$group] = [];
-            }
-
-            $answers[$group][] = $answerrec->answer;
-        }
 
         // Get question attempts order of answers and the users positioning of the answer options.
         $choiceorders = [];
         $userdrops = [];
         foreach ($qa->get_step_iterator() as $step) {
 
+            // Get the attempts randomized choice ordering.
             if ($step->get_state() instanceof \question_state_todo) {
 
                 foreach ($step->get_all_data() as $key => $value) {
@@ -85,7 +72,7 @@ class ddwtos extends base {
         }
 
 
-        // Map the question attempts choice order onto the questions answer options.
+        // Map the question attempts choice order onto the choice options defined in the question.
         $attemptanswers = [];
         foreach ($choiceorders as $group => $grouporder) {
 
@@ -94,7 +81,7 @@ class ddwtos extends base {
             }
 
             foreach ($grouporder as $key => $val) {
-                $attemptanswers[$group][$key + 1] = $answers[$group][$val - 1];
+                $attemptanswers[$group][$key + 1] = $question->choices[$group][$val]->text;
             }
         }
 
@@ -103,9 +90,11 @@ class ddwtos extends base {
         $dom = domdocument_util::initialize_domdocument($questionhtml);
         $xpath = new \DOMXPath($dom);
 
-        $dropzones = $xpath->query('//span[contains(concat(" ", normalize-space(@class), " "), " drop ")]');
+        $dropzones = $xpath->query('//div[@class="qtext"]//span[contains(concat(" ", normalize-space(@class), " "), " drop ")]');
         foreach ($dropzones as $dropzone) {
 
+            // Get the definition of the drop place and the group the drop is defined for
+            // from the drop zones class attribute values.
             /** @var \DOMElement $dropzone */
             $classattr = $dropzone->getAttribute('class');
             $placeval = '';
@@ -117,18 +106,23 @@ class ddwtos extends base {
                     $groupval = $attrval;
                 }
             }
+
+            // Iterate all of the users drops, try to match them onto the dropzone
+            // currently being processed and replace the dropzones text value with
+            // the text of the respective user drop. If the user did not drop anything
+            // on the dropzone a default value indicating an empty drop zone is used
+            // instead.
+            $dropval = get_string('ddwtos_emptydrop_placeholderstr', 'local_quizattemptexport');
             foreach ($userdrops as $key => $val) {
 
                 $dropposition = substr($key, 1);
                 if ($placeval == 'place' . $dropposition) {
-
-                    $dropval = get_string('ddwtos_emptydrop_placeholderstr', 'local_quizattemptexport');
                     if (!empty($val)) {
                         $dropval = $attemptanswers[substr($groupval, -1)][$val];
                     }
-                    $dropzone->textContent = '[' . $dropval . ']';
                 }
             }
+            $dropzone->textContent = '[' . $dropval . ']';
         }
 
         return domdocument_util::save_html($dom);
