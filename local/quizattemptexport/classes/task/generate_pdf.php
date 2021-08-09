@@ -112,11 +112,15 @@ class generate_pdf extends \core\task\scheduled_task {
 
                 mtrace('Marking queued attempt record as processed.');
 
-            } catch (\Exception $e) {
+            } catch (\Throwable $t) {
 
                 mtrace('Error during processing.');
-                mtrace($e->getMessage());
-                mtrace($e->getTraceAsString());
+                mtrace($t->getMessage());
+                mtrace($t->getTraceAsString());
+
+                if (isset($export)) {
+                    $export->logexception($t);
+                }
 
                 // Check how often the PDF generation has failed for the attempt and
                 // either reset the processing status or mark the attempt as failed.

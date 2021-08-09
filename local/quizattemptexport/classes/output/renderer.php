@@ -49,7 +49,7 @@ class renderer extends \plugin_renderer_base {
                 'attempts' => []
             ];
 
-            foreach ($attempts as $attemptid => $files) {
+            foreach ($attempts as $attemptid => $filearrays) {
 
                 $attemptobj = \quiz_attempt::create($attemptid);
 
@@ -64,7 +64,7 @@ class renderer extends \plugin_renderer_base {
                     'reexporturl' => $reexporturl
                 ];
 
-                foreach ($files as $file) {
+                foreach ($filearrays['pdfs'] as $file) {
 
                     /** @var \stored_file $file */
 
@@ -81,7 +81,27 @@ class renderer extends \plugin_renderer_base {
                     $filedata['name'] = $file->get_filename();
                     $filedata['timecreated'] = date('d.m.Y - H:i:s', $file->get_timecreated());
 
-                    $attemptdata['files'][] = $filedata;
+                    $attemptdata['exportfiles'][] = $filedata;
+                }
+
+                foreach ($filearrays['attachments'] as $file) {
+
+                    /** @var \stored_file $file */
+
+                    $filedata = [];
+                    $filedata['url'] = \moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        $file->get_filearea(),
+                        $file->get_itemid(),
+                        $file->get_filepath(),
+                        $file->get_filename(),
+                        false
+                    );
+                    $filedata['name'] = $file->get_filename();
+                    $filedata['timecreated'] = date('d.m.Y - H:i:s', $file->get_timecreated());
+
+                    $attemptdata['attachmentfiles'][] = $filedata;
                 }
 
                 $userdata['attempts'][] = $attemptdata;

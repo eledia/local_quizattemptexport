@@ -25,7 +25,7 @@
 
 namespace local_quizattemptexport;
 
-use local_quizattemptexport\processing\processor;
+use local_quizattemptexport\processing\html\processor as html_processor;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -68,7 +68,7 @@ class generate_attempt_html {
         $html = str_replace('<label', '<span class="quizanswer"', $html);
         $html = str_replace('</label>', '</span>', $html);
 
-        return processor::execute($html, $this->attempt_obj);
+        return html_processor::execute($html, $this->attempt_obj);
     }
 
     private function initialize_attempt(\quiz_attempt $attempt) {

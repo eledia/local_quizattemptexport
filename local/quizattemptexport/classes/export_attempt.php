@@ -28,6 +28,7 @@ namespace local_quizattemptexport;
 
 use core\uuid;
 use Knp\Snappy\Pdf;
+use local_quizattemptexport\processing\attachments\processor as attachment_processor;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -81,7 +82,7 @@ class export_attempt {
 
             // Check export directory.
             try {
-                $this->exportpath = $this->prepare_downloadarea();
+                $this->exportpath = util::prepare_filearea_server($this->attempt_obj);
             } catch (\moodle_exception $e) {
                 $this->logexception($e);
 
@@ -97,45 +98,6 @@ class export_attempt {
         $this->page->set_url('/');
         $this->page->set_pagelayout('popup');
         $this->page->set_pagetype('site-index'); //necessary, or the current url will be used automatically
-    }
-
-
-
-    /**
-     * Checks if there is a download area for exports of the quiz the currently
-     * processed attempt belongs to within the configured directory. If there is
-     * no such area the method tries to create one.
-     *
-     * Trows an exception if  either no base directory has been configured or the
-     * base directory turns out to not be writable.
-     *
-     * @return string
-     * @throws \dml_exception
-     * @throws \moodle_exception
-     */
-    private function prepare_downloadarea() {
-
-        $exportdir = get_config('local_quizattemptexport', 'pdfexportdir');
-
-        if (!is_dir($exportdir)) {
-            throw new \moodle_exception('except_dirmissing', 'local_quizattemptexport', '', $exportdir);
-        }
-
-
-        $course = $this->attempt_obj->get_course();
-        //$coursename = clean_param($course->fullname, PARAM_SAFEDIR);
-        //$dirname = $course->id . '_' . $coursename;
-
-        $dirname = $course->id;
-        $exportpath = $exportdir . '/' . $dirname;
-
-        if (!is_dir($exportpath)) {
-            if (!mkdir($exportpath)) {
-                throw new \moodle_exception('except_dirnotwritable', 'local_quizattemptexport', '', $exportdir);
-            }
-        }
-
-        return $exportpath;
     }
 
 
@@ -253,6 +215,9 @@ class export_attempt {
         $file = $fs->create_file_from_string($filedata, $tempfilecontent);
 
 
+        // Export attachments.
+        attachment_processor::execute($this->attempt_obj);
+
         // Clean up any unexpected output.
         ob_end_clean();
     }
@@ -265,17 +230,17 @@ class export_attempt {
      *
      * @param string $msg
      */
-    private function logmessage($msg) {
+    public function logmessage($msg) {
         $this->logger->error($msg);
     }
 
     /**
-     * Writes the given Exception to the internal log handler
+     * Writes the given Throwable to the internal log handler
      * with as much info as sensible with level CRITICAL.
      *
-     * @param \Exception $exc
+     * @param \Throwable $exc
      */
-    private function logexception($exc) {
+    public function logexception($exc) {
 
         $message = $exc->getMessage();
         $trace = $exc->getTraceAsString();

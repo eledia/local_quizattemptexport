@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_quizattemptexport\processing;
+namespace local_quizattemptexport\processing\html;
 
 defined('MOODLE_INTERNAL') || die();
 

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Postprocessing controller
+ * Controller for HTML postprocessing
  *
  * @package		local_quizattemptexport
  * @copyright	2020 Ralf Wiederhold
@@ -23,7 +23,7 @@
  * @license    	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_quizattemptexport\processing;
+namespace local_quizattemptexport\processing\html;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -55,7 +55,7 @@ class processor {
             $output_html = '';
 
             /** @var \local_quizattemptexport\processing\methods\base $processingclass */
-            $processingclass = '\local_quizattemptexport\processing\methods\\' . $qtype;
+            $processingclass = '\local_quizattemptexport\processing\html\methods\\' . $qtype;
             if (class_exists($processingclass)) {
                 $output_html = $processingclass::process($input_html, $attempt, $slot);
             }

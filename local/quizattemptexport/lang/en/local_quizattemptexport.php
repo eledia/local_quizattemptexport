@@ -25,10 +25,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['attachmentexport_filenamechunk_questionno'] = 'Question';
+$string['attachmentexport_filenamechunk_attachment'] = 'Attachment';
 $string['attemptresult'] = '{$a->gradeachieved} of {$a->grademax} marks ({$a->gradepercent}%)';
 $string['ddimageortext_correctanswer_title'] = 'Correct answers';
 $string['ddmarker_correctanswer_title'] = 'Correct answers';
 $string['ddwtos_emptydrop_placeholderstr'] = '-----------------';
+$string['except_attemptnotinquiz'] = 'The given attempt does not belong to the current quiz instance.';
+$string['except_configinvalid'] = 'A setting of the plugin "local_quizattemptexport" is either missing or contains an invalid value: {$a}';
 $string['except_dirmissing'] = 'Directory missing: {$a}';
 $string['except_dirnotwritable'] = 'Directory is not writable: {$a}';
 $string['except_usernoidnumber'] = 'User does not have an idnumber. User id: {$a}';
@@ -57,11 +61,13 @@ $string['setting_pdfexportdir_desc'] = 'This is the path of a directory within y
 $string['setting_pdfgenerationtimeout'] = 'Timeout for PDF generation (seconds)';
 $string['setting_pdfgenerationtimeout_desc'] = 'Set the timeout in seconds that should apply for the generation of the PDF files. If the generation process has not finished after the given amount of time the process will be cancelled. Set a value of 0 to deactivate the timeout.';
 $string['task_generate_pdf_name'] = 'Generate attempt PDFs';
+$string['template_usersattemptslist_attachmentexportheader'] = 'Attachments uploaded by user';
+$string['template_usersattemptslist_attemptfrom'] = 'Attempt from';
+$string['template_usersattemptslist_exportall'] = 'Re-export all attempts within this quiz instance';
 $string['template_usersattemptslist_noattempts'] = 'Could not find any attempts for this quiz.';
 $string['template_usersattemptslist_nofiles'] = 'Could not find any files for this attempt.';
-$string['template_usersattemptslist_attemptfrom'] = 'Attempt from';
+$string['template_usersattemptslist_pdfexportheader'] = 'Generated PDF files';
 $string['template_usersattemptslist_reexportattempttitle'] = 'Export attempt again';
-$string['template_usersattemptslist_exportall'] = 'Re-export all attempts within this quiz instance';
 $string['template_usersattemptslist_zipdownload'] = 'Download all exported files as ZIP';
 
 $string['envcheck_execfailed'] = 'Error when trying to execute CLI call.';

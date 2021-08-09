@@ -87,7 +87,7 @@ function local_quizattemptexport_pluginfile($course, $cm, $context, $filearea, $
     }
 
     // Make sure the filearea is one of those used by the plugin.
-    if ($filearea !== 'export') {
+    if ($filearea !== 'export' && $filearea !== 'attemptattachments') {
         return false;
     }
 

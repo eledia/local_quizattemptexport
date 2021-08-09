@@ -79,11 +79,23 @@ if ($downloadzip) {
         foreach ($oneattemptfiles as $oneattemptfile) {
             $attemptfiles[$oneattemptfile->get_filename()] = $oneattemptfile;
         }
+
+        $oneattemptattachments = $fs->get_area_files(
+            $context->id,
+            'local_quizattemptexport',
+            'attemptattachments',
+            $attempt->id,
+            'timecreated',
+            false
+        );
+        foreach ($oneattemptattachments as $oneattemptattachment) {
+            $attemptfiles[$oneattemptattachment->get_filename()] = $oneattemptattachment;
+        }
     }
 
     $zipname = clean_param($instance->name, PARAM_FILE);
     $temppath = $CFG->tempdir . '/' . $zipname;
-        $zipper = new zip_packer();
+    $zipper = new zip_packer();
     if ($zipper->archive_to_pathname($attemptfiles, $temppath)) {
         send_temp_file($temppath, $zipname . '.zip');
     } else {
@@ -100,6 +112,9 @@ if ($hasgradecap && $reexportattemptid) {
     require_once $CFG->dirroot . '/mod/quiz/accessmanager.php';
 
     $attempt = \quiz_attempt::create($reexportattemptid);
+    if ($attempt->get_quiz()->id != $instance->id) {
+        throw new moodle_exception('except_attemptnotinquiz', 'local_quizattemptexport');
+    }
 
     $export = new \local_quizattemptexport\export_attempt($attempt);
     $export->export_pdf();
@@ -118,7 +133,7 @@ if ($hasgradecap && $reexportall) {
     $progressbar = new progress_bar('exportall', 2500);
     $progressbar->create();
 
-    $allattempts = $DB->get_records('quiz_attempts', ['quiz' => $instance->id, 'state' => 'finished']);
+    $allattempts = $DB->get_records('quiz_attempts', ['quiz' => $instance->id, 'preview' => 0, 'state' => 'finished']);
     $allattemptsnum = count($allattempts);
     $current = 1;
 
@@ -149,16 +164,30 @@ $navbar->add($strpagetitle, $selfurl);
 // Collect the data we want to display.
 $fs = get_file_storage();
 $rawdata = [];
-foreach ($DB->get_records('quiz_attempts', ['quiz' => $instance->id, 'preview' => 0], '', 'DISTINCT userid AS id') as $userid => $notused) {
+foreach ($DB->get_records('quiz_attempts', ['quiz' => $instance->id, 'preview' => 0, 'state' => 'finished'], '', 'DISTINCT userid AS id') as $userid => $notused) {
 
     $rawdata[$userid] = [];
 
-    foreach ($DB->get_records('quiz_attempts', ['quiz' => $instance->id, 'userid' => $userid, 'state' => 'finished']) as $attempt) {
+    foreach ($DB->get_records('quiz_attempts', ['quiz' => $instance->id, 'userid' => $userid, 'preview' => 0, 'state' => 'finished']) as $attempt) {
 
-        $rawdata[$userid][$attempt->id] = $fs->get_area_files(
+        $rawdata[$userid][$attempt->id] = [
+            'pdfs' => [],
+            'attachments' => []
+        ];
+
+        $rawdata[$userid][$attempt->id]['pdfs'] = $fs->get_area_files(
             $context->id,
             'local_quizattemptexport',
             'export',
+            $attempt->id,
+            'timecreated',
+            false
+        );
+
+        $rawdata[$userid][$attempt->id]['attachments'] = $fs->get_area_files(
+            $context->id,
+            'local_quizattemptexport',
+            'attemptattachments',
             $attempt->id,
             'timecreated',
             false

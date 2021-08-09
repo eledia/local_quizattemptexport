@@ -23,9 +23,9 @@
  * @license    	http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace local_quizattemptexport\processing\methods;
+namespace local_quizattemptexport\processing\html\methods;
 
-use local_quizattemptexport\processing\domdocument_util;
+use local_quizattemptexport\processing\html\domdocument_util;
 
 defined('MOODLE_INTERNAL') || die();
 
