@@ -242,26 +242,6 @@ class generate_attempt_html {
                 margin-top: 10px;
             }
 
-            .que.multichoice div.answer div.correct span.quizanswer {
-                background-image: url('.$CFG->wwwroot.'/local/quizattemptexport/pix/correct.png);
-                background-repeat: no-repeat;
-                background-position: right top;
-                background-color: #fff;
-            }
-
-            .que.multichoice div.answer div.incorrect span.quizanswer {
-                background-image: url('.$CFG->wwwroot.'/local/quizattemptexport/pix/incorrect.png);
-                background-repeat: no-repeat;
-                background-position: right top;
-                background-color: #fff;
-            }
-
-            /* remove default correctness icon, since its positioning in pdf is off */
-            .que.multichoice div.answer div.correct > img,
-            .que.multichoice div.answer div.incorrect > img {
-                display: none;
-            }
-
             div.answer {
                 display: table;
                 width: 90%
@@ -276,6 +256,23 @@ class generate_attempt_html {
                 width: 30px;
                 padding-top: 1px;
                 margin-top: 1px;
+            }
+            
+            div.answer div > * {
+                display: table-cell;
+            }
+
+            div.answer div > [data-region="answer-label"] {
+                width: 100%;
+            }
+            
+            div.answer div > [data-region="answer-label"] .answernumber {
+                min-width: 1.5em;
+            }
+
+            div.answer div > .correctnessicon {
+                min-width: 13px;
+                margin-left: 5px;
             }
 
             span.quizanswer {
