@@ -51,24 +51,28 @@ class generate_attempt_html {
 
     public function generate(\quiz_attempt $attempt) {
 
+        // Initialize attempt object.
         $this->initialize_attempt($attempt);
 
-        ob_start();
+        // Prepare HTML we want to process.
+        $htmltoprocess = $this->generate_attempt_output();
+        list($processedhtml, $additional_css) = html_processor::execute($htmltoprocess, $this->attempt_obj);
 
-        echo $this->page_header();
-        echo $this->custom_css_simple();
-        echo $this->report_header();
-        echo $this->generate_attempt_output();
-        echo $this->page_footer();
+        // Prepare template context.
+        $templatecontext = new \stdClass;
+        $templatecontext->content = $processedhtml;
+        $templatecontext->additional_css = $additional_css;
+        $templatecontext->pdfheader = $this->report_header();
 
-        $html = ob_get_contents();
-        ob_end_clean();
+        // Render html.
+        $renderer = $this->page->get_renderer('core');
+        $output = $renderer->render_from_template('local_quizattemptexport/pdf_base', $templatecontext);
 
-        // Some replacements for better compatibility.
-        $html = str_replace('<label', '<span class="quizanswer"', $html);
-        $html = str_replace('</label>', '</span>', $html);
+        // Process images contained in output.
+        $output = html_processor::embed_images($output);
 
-        return html_processor::execute($html, $this->attempt_obj);
+        // Return finished html output.
+        return $output;
     }
 
     private function initialize_attempt(\quiz_attempt $attempt) {
@@ -172,213 +176,7 @@ class generate_attempt_html {
             'attemptresult' => $attemptresultstr
         ];
 
-        // Render template and return html.
-        $renderer = $this->page->get_renderer('core');
-        return $renderer->render_from_template('local_quizattemptexport/pdf_header', $templatedata);
-    }
-
-    /**
-     * Get a simplyfied header to reduce the errors while creating pdf.
-     * @return string
-     */
-    protected function page_header() {
-
-        return '<!DOCTYPE html>
-        <html  dir="ltr" lang="de" xml:lang="de">
-            <body  id="page-site-index">
-                <div id="page" class="container-fluid">
-                    <div id="page-content" class="row-fluid">
-                        <section id="region-main" class="span12">
-                            <span class="notifications" id="user-notifications"></span><div role="main"><span id="maincontent"></span>
-        ';
-    }
-
-    /**
-     * Get a simplyfied footer to reduce the errors while creating pdf.
-     * @return string
-     */
-    protected function page_footer() {
-        return '
-                        </section>
-                    </div>
-                </div>
-            </body>
-        </html>
-        ';
-    }
-
-
-    /**
-     * Get a simple css definition.
-     * @return string
-     */
-    protected function custom_css_simple() {
-        global $CFG;
-
-        return '<style type="text/css">
-            @page {
-                margin-top: 20px;
-                margin-bottom: 20px;
-                margin-left: 50px;
-                margin-right: 50px;
-            }
-
-            body {
-                font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-                font-size: 10pt;
-            }
-
-            img.questioncorrectnessicon,
-            .informationitem {
-                display: none;
-            }
-
-            .ablock .prompt {
-                margin-top: 10px;
-                font-weight: bold;
-            }
-
-            .outcome {
-                margin-top: 10px;
-            }
-
-            div.answer {
-                display: table;
-                width: 90%
-            }
-            div.answer .r0, div.answer .r1 {
-                display: table-row;
-            }
-
-            div.answer div input {
-                display: table-cell;
-                vertical-align: top;
-                width: 30px;
-                padding-top: 1px;
-                margin-top: 1px;
-            }
-            
-            div.answer div > * {
-                display: table-cell;
-            }
-
-            div.answer div > [data-region="answer-label"] {
-                width: 100%;
-            }
-            
-            div.answer div > [data-region="answer-label"] .answernumber {
-                min-width: 1.5em;
-            }
-
-            div.answer div > .correctnessicon {
-                min-width: 13px;
-                margin-left: 5px;
-            }
-
-            span.quizanswer {
-                display: table-cell;
-                padding-right: 50px;
-                padding-bottom: 5px;
-                padding-top: 5px;
-                margin-top: 5px;
-            }
-
-            div.que {
-                page-break-before: always;
-                border-style: solid;
-                border-width: 1px;
-                border-color: #dddddd;
-                padding-left: 15px;
-                padding-right: 15px;
-                padding-bottom: 10px;
-                margin-bottom: 10px;
-            }
-            div.nobreak {
-                page-break-after: avoid;
-                page-break-before: auto;
-            }
-            
-            /**
-                table styling
-             */
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            
-            table th,
-            table td {
-                padding: 5px 10px;
-                border: 1px solid #000;
-                text-align: left;
-            }
-            
-            table.reportheader th {
-                text-align: right;
-                width: 30%;
-            }
-            
-            /*
-                Hide specific links that are displayed by moodle if the
-                user context the export happens in has review rights for
-                the given attempt.
-             */
-            div.que div.commentlink,
-            div.que div.editquestion {
-                display: none;
-            }
-            
-            /**
-                Question header styling
-            */
-            div.info {
-                background-color: #dddddd;
-                margin-top: 10px;
-                padding: 10px;
-            }
-            
-            div.info h3 {
-                margin: 0 0 10px 0;
-                padding: 0 0 5px 5px;
-                border-bottom: 1px solid #000;
-            }
-            
-            div.info .state,
-            div.info .grade {
-                font-weight: bold;
-                margin: 10px 0 0 10px;
-            }
-            
-            /**
-                question sections styling
-             */
-             div.comment,
-             div.outcome,
-             div.formulation,
-             div.correctresult, /* Added manually in processing methods */
-             div.history {
-                page-break-inside: avoid;
-                border: 1px solid #000;
-                margin: 10px 0;
-                padding: 10px;
-             }
-             
-             div.comment h4,
-             div.outcome h4,
-             div.formulation h4,
-             div.correctresult h4, /* Added manually in processing methods */
-             div.history h4 {
-                margin: 0 0 10px 0;
-             }
-             
-             /*
-                Make sure images do not exceed pdf width.
-              */
-             img {
-                max-width: 100%;
-             }
-             
-        </style>';
+        return $templatedata;
     }
 
     protected function generate_attempt_output() {
@@ -576,6 +374,4 @@ class generate_attempt_html {
 
         return $output;
     }
-
-
 }

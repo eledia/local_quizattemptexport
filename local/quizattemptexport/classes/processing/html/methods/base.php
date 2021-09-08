@@ -44,4 +44,16 @@ abstract class base {
      */
     abstract public static function process(string $questionhtml, \quiz_attempt $attempt, int $slot) : string;
 
+
+    /**
+     * Implementing classes may define any additional CSS required within
+     * the return value of this method. It will then be added to the document
+     * within a CSS block.
+     *
+     * @return string
+     */
+    public static function get_css() : string {
+        return '';
+    }
+
 }

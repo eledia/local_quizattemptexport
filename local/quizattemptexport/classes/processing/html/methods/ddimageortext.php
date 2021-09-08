@@ -151,6 +151,23 @@ class ddimageortext extends base {
         return domdocument_util::save_html($dom);
     }
 
+
+    public static function get_css(): string {
+        return "
+            .ddimageortext div.correctresult {
+                page-break-inside: avoid;
+                border: 1px solid #000;
+                margin: 10px 0;
+                padding: 10px;
+            }
+            
+            .ddimageortext div.correctresult h4 {
+                margin: 0 0 10px 0;
+            }
+        ";
+    }
+
+
     protected static function generate_image(\qtype_ddimageortext_question $question, array $dropdefinitions) {
         global $CFG, $DB;
 

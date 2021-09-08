@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html  dir="ltr" lang="de" xml:lang="de">
+    <head>
+        <title></title>
+        <style type="text/css">
+
+            /** General page styling **/
+            @page {
+                margin-top: 20px;
+                margin-bottom: 20px;
+                margin-left: 50px;
+                margin-right: 50px;
+            }
+
+            body {
+                font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+                font-size: 10pt;
+            }
+
+            /*
+               Make sure images do not exceed pdf width.
+             */
+            img {
+                max-width: 100%;
+            }
+
+
+            /** General table styling **/
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            table th,
+            table td {
+                padding: 5px 10px;
+                border: 1px solid #000;
+                text-align: left;
+            }
+
+
+            /** General question styling **/
+            div.que {
+                page-break-before: always;
+                border-style: solid;
+                border-width: 1px;
+                border-color: #dddddd;
+                padding-left: 15px;
+                padding-right: 15px;
+                padding-bottom: 10px;
+                margin-bottom: 10px;
+            }
+            div.nobreak {
+                page-break-after: avoid;
+                page-break-before: auto;
+            }
+
+            /*
+                Hide specific links that are displayed by moodle if the
+                user context the export happens in has review rights for
+                the given attempt.
+             */
+            div.que div.commentlink,
+            div.que div.editquestion {
+                display: none;
+            }
+
+            /**
+                Question header styling
+            */
+            div.info {
+                background-color: #dddddd;
+                margin-top: 10px;
+                padding: 10px;
+            }
+
+            div.info h3 {
+                margin: 0 0 10px 0;
+                padding: 0 0 5px 5px;
+                border-bottom: 1px solid #000;
+            }
+
+            div.info .state,
+            div.info .grade {
+                font-weight: bold;
+                margin: 10px 0 0 10px;
+            }
+
+            /**
+                question sections styling
+             */
+            div.comment,
+            div.outcome,
+            div.formulation,
+            div.history {
+                page-break-inside: avoid;
+                border: 1px solid #000;
+                margin: 10px 0;
+                padding: 10px;
+            }
+
+            div.comment h4,
+            div.outcome h4,
+            div.formulation h4,
+            div.history h4 {
+                margin: 0 0 10px 0;
+            }
+
+            {{{additional_css}}}
+
+        </style>
+    </head>
+    <body  id="page-site-index">
+        <div id="page" class="container-fluid">
+            <div id="page-content" class="row-fluid">
+                <section id="region-main" class="span12">
+                    <span class="notifications" id="user-notifications"></span>
+                    <div role="main">
+                        <span id="maincontent"></span>
+                        {{#pdfheader}}
+                            {{> local_quizattemptexport/pdf_header}}
+                        {{/pdfheader}}
+
+                        {{{content}}}
+                    </div>
+                </section>
+            </div>
+        </div>
+    </body>
+</html>

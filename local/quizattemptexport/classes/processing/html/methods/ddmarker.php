@@ -196,6 +196,21 @@ class ddmarker extends base {
         return domdocument_util::save_html($dom);
     }
 
+    public static function get_css(): string {
+        return "
+            .ddmarker div.correctresult {
+                page-break-inside: avoid;
+                border: 1px solid #000;
+                margin: 10px 0;
+                padding: 10px;
+            }
+            
+            .ddmarker div.correctresult h4 {
+                margin: 0 0 10px 0;
+            }
+        ";
+    }
+
     protected static function generate_image(\qtype_ddmarker_question $question, array $rendermarkers, bool $avoidoverlap = false) {
         global $CFG, $DB;
 
@@ -402,7 +417,7 @@ class ddmarker extends base {
 
         // Sort textboxes by their x-coordinates to enforce rendering in a left-to-right fashion to
         // avoid situations where the left side of a text box is overlapped by another box.
-        usort($textboxes, ['\local_quizattemptexport\processing\methods\ddmarker', 'sort_boxes_ltr']);
+        usort($textboxes, ['\local_quizattemptexport\processing\html\methods\ddmarker', 'sort_boxes_ltr']);
 
         // Calculate largest x and y values so we may check if any of our boxes exceed the
         // available background.

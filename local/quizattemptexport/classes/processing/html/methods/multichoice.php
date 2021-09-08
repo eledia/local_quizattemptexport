@@ -89,4 +89,52 @@ class multichoice extends base {
         return domdocument_util::save_html($dom);
     }
 
+    public static function get_css(): string {
+        return "
+            .multichoice .ablock .prompt {
+                margin-top: 10px;
+                font-weight: bold;
+            }
+            
+            .multichoice div.answer {
+                display: table;
+                width: 90%
+            }
+            .multichoice div.answer .r0, 
+            .multichoice div.answer .r1 {
+                display: table-row;
+            }
+
+            .multichoice div.answer div input {
+                display: table-cell;
+                vertical-align: top;
+                width: 30px;
+                padding-top: 1px;
+                margin-top: 1px;
+            }
+
+            .multichoice div.answer div > * {
+                display: table-cell;
+            }
+
+            .multichoice div.answer div > [data-region='answer-label'] {
+                width: 100%;
+            }
+
+            .multichoice div.answer div > [data-region='answer-label'] .answernumber {
+                min-width: 1.5em;
+            }
+
+            .multichoice div.answer div > .correctnessicon {
+                min-width: 13px;
+                margin-left: 5px;
+            }
+            
+            .multichoice div.answer div > .specificfeedback {
+                padding-left: 15px;
+                min-width: 200px;
+            }
+        ";
+    }
+
 }

@@ -30,10 +30,10 @@ defined('MOODLE_INTERNAL') || die();
 class processor {
 
     public static function execute(string $html, \quiz_attempt $attempt) {
-        global $CFG, $DB;
 
         $html = domdocument_util::prepare_html($html);
         $dom = domdocument_util::initialize_domdocument($html);
+        $additional_css = [];
 
         $xpath = new \DOMXPath($dom);
         $questions = $xpath->query('//div[starts-with(@class, "que ")]');
@@ -54,10 +54,13 @@ class processor {
             $input_html = domdocument_util::prepare_html($input_html);
             $output_html = '';
 
-            /** @var \local_quizattemptexport\processing\methods\base $processingclass */
+            /** @var \local_quizattemptexport\processing\html\methods\base $processingclass */
             $processingclass = '\local_quizattemptexport\processing\html\methods\\' . $qtype;
             if (class_exists($processingclass)) {
                 $output_html = $processingclass::process($input_html, $attempt, $slot);
+                if (!isset($additional_css[$qtype])) {
+                    $additional_css[$qtype] = $processingclass::get_css();
+                }
             }
 
             if (!empty($output_html)) {
@@ -65,12 +68,23 @@ class processor {
             }
         }
 
+        // Return html and additional css as array.
+        return [$html, implode("\n\n", $additional_css)];
+    }
 
+    /**
+     * Transform any image contained within the content that is not already a data url
+     * into a data URL. This is necessary for local files served through moodle file
+     * system but will also avoid problems where wkhtmltopdf will not be able to load
+     * non-local files.
+     *
+     * @param string $html
+     * @return string
+     * @throws \dml_exception
+     */
+    public static function embed_images(string $html) {
+        global $CFG, $DB;
 
-        // Transform any image contained within the content that is not already a data url
-        // into a data URL. This is necessary for local files served through moodle file
-        // system but will also avoid problems where wkhtmltopdf will not be able to load
-        // non-local files.
         $dom = domdocument_util::initialize_domdocument($html);
         $xpath = new \DOMXPath($dom);
         $imgs = $xpath->query('//img');
