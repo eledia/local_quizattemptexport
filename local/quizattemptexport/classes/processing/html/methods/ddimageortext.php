@@ -189,7 +189,16 @@ class ddimageortext extends base {
         }
 
         // Load background into GD.
-        $gdbgfile = imagecreatefromstring($bgfilecontent);
+        // We do this by creating a fresh true color image with the dimensions of the background
+        // and copy the actual background onto the new true color image. This way we will always
+        // have a true color image as our base image and don't have to care about the background
+        // images color mode.
+        $gdbgfile = imagecreatetruecolor($bgfileinfo['width'], $bgfileinfo['height']);
+        $bgcolor = imagecolorallocate($gdbgfile, 255, 255, 255);
+        imagefilledrectangle($gdbgfile, 0, 0, $bgfileinfo['width'], $bgfileinfo['height'], $bgcolor);
+        $tempbg = imagecreatefromstring($bgfilecontent);
+        imagecopyresampled($gdbgfile, $tempbg, 0, 0, 0, 0, $bgfileinfo['width'], $bgfileinfo['height'], $bgfileinfo['width'], $bgfileinfo['height']);
+        imagedestroy($tempbg);
 
         // Defining some data used in the following calculations.
         $font = $CFG->dirroot . '/local/quizattemptexport/font/Open_Sans/OpenSans-Regular.ttf';

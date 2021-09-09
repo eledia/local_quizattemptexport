@@ -231,9 +231,20 @@ class ddmarker extends base {
             $calculatedfontsize = 15;
         }
 
-        // Load background image and marker icon into GD.
+        // Load icon into GD.
         $markerimg = imagecreatefrompng($CFG->dirroot . '/local/quizattemptexport/pix/crosshairs.png');
-        $gdbgfile = imagecreatefromstring($bgfilecontent);
+
+        // Load background into GD.
+        // We do this by creating a fresh true color image with the dimensions of the background
+        // and copy the actual background onto the new true color image. This way we will always
+        // have a true color image as our base image and don't have to care about the background
+        // images color mode.
+        $gdbgfile = imagecreatetruecolor($bgfileinfo['width'], $bgfileinfo['height']);
+        $bgcolor = imagecolorallocate($gdbgfile, 255, 255, 255);
+        imagefilledrectangle($gdbgfile, 0, 0, $bgfileinfo['width'], $bgfileinfo['height'], $bgcolor);
+        $tempbg = imagecreatefromstring($bgfilecontent);
+        imagecopyresampled($gdbgfile, $tempbg, 0, 0, 0, 0, $bgfileinfo['width'], $bgfileinfo['height'], $bgfileinfo['width'], $bgfileinfo['height']);
+        imagedestroy($tempbg);
 
         // Iterate the shapes, if any, and render them onto the background.
         foreach ($rendermarkers['shapes'] as $shape) {
