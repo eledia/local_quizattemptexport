@@ -61,4 +61,17 @@ if ($hassiteconfig) { // needs this condition or there is error on login page
             PARAM_INT)
     );
 
+    $settings->add(new admin_setting_configcheckbox('local_quizattemptexport/mathjaxenable',
+            get_string('setting_mathjaxenable', 'local_quizattemptexport'),
+            get_string('setting_mathjaxenable_desc', 'local_quizattemptexport'),
+            0)
+    );
+
+    $settings->add(new admin_setting_configtext('local_quizattemptexport/mathjaxdelay',
+            get_string('setting_mathjaxdelay', 'local_quizattemptexport'),
+            get_string('setting_mathjaxdelay_desc', 'local_quizattemptexport'),
+            10,
+            PARAM_INT)
+    );
+
 }

@@ -104,6 +104,8 @@ class export_attempt {
     public function export_pdf() {
         global $CFG, $DB;
 
+        $conf = util::get_config();
+
         // Generate the HTML content to be rendered into a PDF.
         $generator = new generate_attempt_html($this->page);
         $html = $generator->generate($this->attempt_obj);
@@ -122,30 +124,23 @@ class export_attempt {
             $binarypath = $CFG->dirroot . '/local/quizattemptexport/vendor/wemersonjanuario/wkhtmltopdf-windows/bin/64bit/wkhtmltopdf.exe';
         }
 
-        // Get the configured timeout for PDF generation. A settings value of 0 should deactivate the timeout, i.e. we use
-        // NULL as the timeout value.
-        $timeout = null;
-        if ($settingstimeout = get_config('local_quizattemptexport', 'pdfgenerationtimeout')) {
-            $settingstimeout = (int) $settingstimeout;
-            if ($settingstimeout < 0) {
-                $settingstimeout = null;
-            }
-            $timeout = $settingstimeout;
-        }
-
-
         try {
             // Start pdf generation and write into a temp file.
             $snappy = new Pdf();
             $snappy->setLogger($this->logger);
             $snappy->setTemporaryFolder($CFG->tempdir);
-            $snappy->setTimeout($timeout);
+            $snappy->setTimeout($conf->pdfgenerationtimeout);
 
             $snappy->setOption('toc', false);
             $snappy->setOption('no-outline', true);
             $snappy->setOption('images', true);
             $snappy->setOption('enable-local-file-access', true);
             $snappy->setOption('enable-external-links', true);
+
+            if ($conf->mathjaxenable) {
+                $snappy->setOption('javascript-delay', $conf->mathjaxdelay);
+            }
+
             $snappy->setBinary($binarypath);
             $snappy->generateFromHtml($html, $tempexportfile);
 

@@ -50,6 +50,9 @@ class generate_attempt_html {
     }
 
     public function generate(\quiz_attempt $attempt) {
+        global $CFG;
+
+        $conf = get_config('local_quizattemptexport');
 
         // Initialize attempt object.
         $this->initialize_attempt($attempt);
@@ -63,6 +66,23 @@ class generate_attempt_html {
         $templatecontext->content = $processedhtml;
         $templatecontext->additional_css = $additional_css;
         $templatecontext->pdfheader = $this->report_header();
+
+        // Check if MathJax typesetting has been enabled.
+        if ($conf->mathjaxenable) {
+
+            // Build base path to MathJax.
+            $basepath = $CFG->dirroot . DIRECTORY_SEPARATOR . 'local'. DIRECTORY_SEPARATOR . 'quizattemptexport'. DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'mathjax'. DIRECTORY_SEPARATOR . 'mathjax'. DIRECTORY_SEPARATOR;
+            $osinfo = php_uname('s');
+            if (false !== strpos($osinfo, 'Windows')) {
+                // Within Windows environment the path requires a bit of tweaking...
+                $basepath = 'file:///' . $basepath;
+                $basepath = str_replace('\\', '%5C', $basepath);
+            }
+
+            $templatecontext->mathjax = new \stdClass;
+            $templatecontext->mathjax->basepath = $basepath;
+            $templatecontext->mathjax->jaxpath = $templatecontext->mathjax->basepath . 'MathJax.js';
+        }
 
         // Render html.
         $renderer = $this->page->get_renderer('core');

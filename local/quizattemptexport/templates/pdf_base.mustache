@@ -2,6 +2,17 @@
 <html  dir="ltr" lang="de" xml:lang="de">
     <head>
         <title></title>
+        {{#mathjax}}
+            <script type="text/x-mathjax-config">
+                  MathJax.Hub.Config({
+                        extensions: ["tex2jax.js"],
+                        jax: ["input/TeX","output/HTML-CSS"],
+                        tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+                        root : "{{{mathjax.basepath}}}"
+                  });
+            </script>
+            <script type="text/javascript" src="{{{mathjax.jaxpath}}}"></script>
+        {{/mathjax}}
         <style type="text/css">
 
             /** General page styling **/
@@ -17,6 +28,13 @@
                 font-size: 10pt;
             }
 
+            /*
+                Hide Mathjax page overlay
+            */
+            #MathJax_Message {
+                display: none;
+            }
+            
             /*
                Make sure images do not exceed pdf width.
              */

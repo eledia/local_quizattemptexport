@@ -75,4 +75,33 @@ class util {
         return $exportpath;
     }
 
+
+    public static function get_config() {
+        $conf = get_config('local_quizattemptexport');
+
+        // Check timeout for PDF-Generation. An empty value or value < 1 will deactivate the timeout.
+        if ($conf->pdfgenerationtimeout) {
+            $settingstimeout = (int) $conf->pdfgenerationtimeout;
+            if ($settingstimeout < 1) {
+                $settingstimeout = null;
+            }
+            $conf->pdfgenerationtimeout = $settingstimeout;
+        } else {
+            $conf->pdfgenerationtimeout = null;
+        }
+
+        // Check MathJax delay. If an invalid value was set, reset it to the default.
+        if ($conf->mathjaxdelay) {
+            $delay = (int) $conf->mathjaxdelay;
+            if ($delay < 1) {
+                $delay = 10;
+            }
+            $conf->mathjaxdelay = $delay * 1000; // Setting is in seconds, milliseconds are required.
+        } else {
+            $conf->mathjaxdelay = 10000;
+        }
+
+        return $conf;
+    }
+
 }

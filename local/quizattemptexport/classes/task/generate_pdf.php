@@ -33,6 +33,7 @@
 namespace local_quizattemptexport\task;
 
 use local_quizattemptexport\export_attempt;
+use local_quizattemptexport\util;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -50,6 +51,7 @@ class generate_pdf extends \core\task\scheduled_task {
     const STATUS_ERROR = 3;
 
     const ATTEMPTS_PER_RUN = 100;
+    const JSDELAY_CUTOFF_SECONDS = 60;
 
     public function get_name() {
         return get_string('task_generate_pdf_name', 'local_quizattemptexport');
@@ -58,9 +60,10 @@ class generate_pdf extends \core\task\scheduled_task {
     public function execute() {
         global $DB;
 
+        $conf = util::get_config();
+
         // Check if automatic export is enabled.
-        $exportenabled = get_config('local_quizattemptexport', 'autoexport');
-        if (!$exportenabled) {
+        if (!$conf->autoexport) {
             mtrace('Automatic export disabled. Exiting.');
             return;
         }
@@ -75,8 +78,21 @@ class generate_pdf extends \core\task\scheduled_task {
         mtrace('Lock gained.');
         mtrace('Choosing attempts to export.');
 
+        // Calculate number of attempts to process.
+        $attemptsperrun = self::ATTEMPTS_PER_RUN;
+        if ($conf->mathjaxenable) {
+
+            // If MathJax typesetting is enabled we will have a specific delay applied
+            // per PDF transformation. We have to account for that delay to avoid
+            // blocking general execution of cron tasks.
+            $jsdelay = $conf->mathjaxdelay / 1000; // Value in milliseconds.
+            $attemptsperrun = floor(self::JSDELAY_CUTOFF_SECONDS / $jsdelay);
+        }
+        mtrace('Max attempts being processed: ' . $attemptsperrun);
+
+
         // Get some non processed attempts and mark them as being processed.
-        $attempts = $DB->get_records('quizattemptexport', ['status' => self::STATUS_WAITING], 'timecreated ASC', '*', 0, self::ATTEMPTS_PER_RUN);
+        $attempts = $DB->get_records('quizattemptexport', ['status' => self::STATUS_WAITING], 'timecreated ASC', '*', 0, $attemptsperrun);
         foreach ($attempts as $attempt) {
             $DB->set_field('quizattemptexport', 'status', self::STATUS_PROCESSING, ['id' => $attempt->id]);
             mtrace('Marking queued attempt record as being processed: ' . $attempt->id);
